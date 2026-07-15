@@ -1,0 +1,26 @@
+#!/bin/sh
+# Under the BSD 3-Clause License by Teng Zhang (zhteg4@gmail.com)
+: '
+Functions shared by multiple sh scripts.
+
+Usage:
+  . nemd_func
+  format_py yapf
+'
+
+# Debug Printing
+[ -z $DEBUG ] && debug() { :; } || debug() { echo "$@"; }
+
+add_path()
+{
+  [ -z $1 ] && return
+  echo $1 && [ -d "$1" ] && echo $PATH | grep -q "$1" && return
+  export PATH="$1${PATH:+":$PATH"}"
+}
+
+add_pypath()
+{
+  [ -z $1 ] && return
+  echo $1 && [ -d "$1" ] && echo $PYTHONPATH | grep -q "$1" && return
+  export PYTHONPATH="$1${PYTHONPATH:+":$PYTHONPATH"}"
+}

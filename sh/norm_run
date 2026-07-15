@@ -1,0 +1,77 @@
+#!/bin/sh
+# Under the BSD 3-Clause License by Teng Zhang (zhteg4@gmail.com)
+: '
+Set environmental variables, locate the script, and execute the python program.
+
+usage:
+  norm_run hist07.py -JOBNAME jobname
+
+Set environmental variables from command-line arguments.
+  1. -JOBNAME [STR]: jobname based on which output files are named
+  2. -PYTHON [INT]: the python mode (e.g., 0: original, 1: compiled)
+  3. -DEBUG: debug mode for additional printing and output files
+  4. -INTERAC: pop up the interactive GUI
+
+Supported additional flags:
+  -m venv|yapf|pytest|cProfile
+  -X importtime
+  -c <program passed in as string>
+'
+FLAG_PYTHON="-PYTHON"
+FLAG_JOBNAME="-JOBNAME"
+FLAG_INTERAC="-INTERAC"
+FLAG_SCREEN="-screen"
+
+# Help
+[ "$1" = "-h" ] && echo "Example: norm_run hist07.py" && exit 0
+
+# Debug Mode
+a=''; for val in "$@" ""; do \
+  [ "$a" = "-DEBUG" ] && export DEBUG='1' && break || a=$val; done
+[ ! -z $DEBUG ] && case $(echo $val | tr [A-Z] [a-z]) \
+  in n|no|f|false|off|0) export DEBUG='' ;; esac
+
+. nemd_func
+
+# Python script
+for val in "$@"; do
+  shift
+  case $val in
+    *.py|*.py::*)
+      # Python Script
+      SCRIPT=${val%%::*} && debug "Python Script: $SCRIPT"
+      NAME=$(basename $SCRIPT)
+      [ $NAME != 'test_workflow.py' ] && export TQDM_DISABLE='1'
+      # Set JOBNAME
+      for SUFFIX in _driver.py _workflow.py ".*"; do \
+        export JOBNAME=${NAME%%$SUFFIX} && [ $JOBNAME != $NAME ] && break; done
+      debug $JOBNAME
+      # Absolute (or relative) path or in $PATH
+      SPATH="$(cd $(dirname $SCRIPT); pwd)/$NAME" && debug $SPATH
+      [ ! -f "$SPATH" ] && SPATH=$(which $SCRIPT) && debug $SPATH
+      [ ! -f "$SPATH" ] && echo "Please install $NAME, or premake" && exit 2
+      val=$SPATH${val#$SCRIPT}
+      ;;
+      esac
+  set -- "$@" "$val"
+done
+
+# Command-line Arguments
+val=''; for nxt in "$@" ''; do
+  case $val in
+    -*)
+      if [ -z ${FLAG_PYTHON##$val*} ]; then
+        export PYTHON=$nxt
+      elif [ -z ${FLAG_JOBNAME##$val*} ]; then
+        export JOBNAME=$nxt
+      elif [ -z ${FLAG_INTERAC##$val*} ]; then
+        export INTERAC='1'
+      elif [ -z ${FLAG_SCREEN##$val*} ] && [ "$nxt" != "off" ]; then
+        export TQDM_DISABLE=''
+      fi
+      ;;
+  esac
+  val=$nxt
+done
+
+debug "$@"; python "$@"
