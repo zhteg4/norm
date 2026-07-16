@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
-import logging
 import numpy as np
 import sys
 import pathlib
 from norm import parserutils
-import datetime
+from norm import logutils
 import argparse
 
 def norm(options=None):
@@ -49,29 +48,12 @@ def get_parser(file):
                         help='The jobname to name output files')
     return parser
 
-def get_logger(options=None):
-    logger = logging.getLogger(options.JOBNAME)
-    logging.basicConfig(filename=f"{options.JOBNAME}.log", level=logging.INFO, filemode='w')
-    return logger
-
-def log_options(options=None):
-    OPTIONS = 'Options'
-    OPTIONS_START = f'..........{OPTIONS}..........'
-    OPTIONS_END = OPTIONS_START.replace(OPTIONS, '.' * len(OPTIONS))
-    logger.info(OPTIONS_START)
-    for key, val in options.__dict__.items():
-        if type(val) is list:
-            val = ' '.join(map(str, val))
-        logger.info(f"{key}: {val}")
-    logger.info(f"JobStart: {datetime.datetime.now().strftime('%H:%M:%S')}")
-    logger.info(OPTIONS_END)
-
 
 if __name__ == '__main__':
     parser = get_parser(sys.argv[0])
     options = parser.parse_args(sys.argv[1:])
-    logger = get_logger(options=options)
-    log_options(options=options)
+    logger = logutils.get_logger(options=options)
+    logutils.log_options(options=options, logger=logger)
     if options.seed is None:
         options.seed = np.random.randint(0, 2**32)
         logger.info(f'Random seed: {options.seed}')
