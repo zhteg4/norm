@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import logging
 import numpy as np
 import sys
 import pathlib
@@ -15,7 +16,7 @@ def norm(options=None):
         plt.show()
     filename = f'{options.JOBNAME}.svg'
     fig.savefig(filename)
-    print(f'Figure saved as {filename}')
+    logger.info(f'Figure saved as {filename}')
 
 
 def get_parser(file):
@@ -50,9 +51,11 @@ def get_parser(file):
 
 parser = get_parser(sys.argv[0])
 options = parser.parse_args(sys.argv[1:])
+logger = logging.getLogger(options.JOBNAME)
+logging.basicConfig(filename=options.JOBNAME, level=logging.INFO, filemode='w')
 if options.seed is None:
     options.seed = np.random.randint(0, 2**32)
-    print(f'Random seed: {options.seed}')
+    logger.info(f'Random seed: {options.seed}')
     np.random.seed(options.seed)
 norm(options)
 
