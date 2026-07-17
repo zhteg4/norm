@@ -52,10 +52,9 @@ def get_parser(file):
 if __name__ == '__main__':
     parser = get_parser(sys.argv[0])
     options = parser.parse_args(sys.argv[1:])
-    logger = logutils.get_logger(options=options)
-    logutils.log_options(options=options, logger=logger)
     if options.seed is None:
         options.seed = np.random.randint(0, 2**32)
-        logger.info(f'Random seed: {options.seed}')
         np.random.seed(options.seed)
+    logger = logutils.get_logger(options=options)
+    logutils.log_options(options=options, logger=logger)
     norm(options)
