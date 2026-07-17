@@ -55,6 +55,7 @@ if __name__ == '__main__':
     if options.seed is None:
         options.seed = np.random.randint(0, 2**32)
         np.random.seed(options.seed)
-    logger = logutils.get_logger(options=options)
-    logutils.log_options(options=options, logger=logger)
+    logger = logutils.Logger.get(options.JOBNAME)
+    logger.infoJob(options)
     norm(options)
+    logger.info('Finished', timestamp=True)

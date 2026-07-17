@@ -1,2 +1,1 @@
-__all__ = ['ourmodule']
-from norm import *
+from . import ourmodule
