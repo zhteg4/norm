@@ -13,8 +13,8 @@ def get_logger(options=None):
 def log_options(options=None, logger=None):
     logger.info(f'..........{OPTIONS}..........')
     for key, val in options.__dict__.items():
-        if type(val) is list:
+        if isinstance(val, list):
             val = ' '.join(map(str, val))
         logger.info(f"{key}: {val}")
-    logger.info(f"JobStart: {datetime.datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"JobStart: {datetime.datetime.now().strftime('%H:%M:%S %m/%d/%Y')}")
     logger.info(OPTIONS_END)
