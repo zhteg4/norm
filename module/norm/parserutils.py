@@ -13,7 +13,7 @@ def type_int(val):
     try:
         return int(val)
     except (ValueError, TypeError):
-        raise argparse.ArgumentTypeError(f'invalid float value: {val}')
+        raise argparse.ArgumentTypeError(f'invalid int value: {val}')
 
 def type_positive_float(val):
     val = type_float(val)
