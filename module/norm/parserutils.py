@@ -31,3 +31,5 @@ def type_seed(val):
         np.random.seed(val)
         return val
     raise argparse.ArgumentTypeError(f'not in [0, 2**32): {val}')
+
+

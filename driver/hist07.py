@@ -36,7 +36,7 @@ def get_parser(file):
                         type=parserutils.type_positive_int,
                         default=200,
                         help='Width of the distribution')
-    parser.add_argument('-INTERACTIVE',
+    parser.add_argument('-INTERAC',
                         action='store_true',
                         help='Enable interactive mode')
     parser.add_argument('-seed',
