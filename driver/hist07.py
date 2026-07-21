@@ -19,7 +19,7 @@ def get_parser():
                         help='Mean of the distribution')
     parser.add_argument('-scale',
                         metavar='FLOAT',
-                        type=parserutils.type_positive_float,
+                        type=parserutils.Float.typePositive,
                         default=1.5,
                         help='Width of the distribution')
     parserutils.add_size(parser)

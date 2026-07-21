@@ -1,38 +1,71 @@
-import argparse
-import numpy as np
-import pathlib
 import sys
 
-def type_float(val):
-    try:
-        return float(val)
-    except (ValueError, TypeError):
-        raise argparse.ArgumentTypeError(f'invalid float value: {val}')
+import argparse
 
-def type_int(val):
-    try:
-        return int(val)
-    except (ValueError, TypeError):
-        raise argparse.ArgumentTypeError(f'invalid int value: {val}')
+import pathlib
+import random
 
-def type_positive_float(val):
-    val = type_float(val)
-    if val > 0:
-        return val
-    raise argparse.ArgumentTypeError(f'invalid positive number: {val}')
+import numpy as np
 
-def type_positive_int(val):
-    val = type_int(val)
-    if val > 0:
-        return val
-    raise argparse.ArgumentTypeError(f'invalid a positive integer: {val}')
 
-def type_seed(val):
-    val = type_int(val)
-    if 0 <= val < 2**32:
-        np.random.seed(val)
-        return val
-    raise argparse.ArgumentTypeError(f'not in [0, 2**32): {val}')
+class Float:
+
+    Type = float
+
+    def __init__(self, arg, bot=None, top=None, incl_bot=True, incl_top=True):
+        self.arg = arg
+        self.bot = bot
+        self.top = top
+        self.incl_bot = incl_bot
+        self.incl_top = incl_top
+        self.typed = None
+
+    @classmethod
+    def typePositive(cls, *args, incl_bot=False, **kwargs):
+        return cls.typeNonnegative(*args, incl_bot=incl_bot, **kwargs)
+
+    @classmethod
+    def typeNonnegative(cls, *args, bot=0, **kwargs):
+        return cls.type(*args, bot=bot, **kwargs)
+
+    @classmethod
+    def type(cls, *args, **kwargs):
+        obj = cls(*args, **kwargs)
+        obj.run()
+        return obj.typed
+
+    def run(self):
+        try:
+            self.typed = self.Type(self.arg)
+        except ValueError:
+            self.error(f'invalid {self.Type.__name__} value: {self.arg}')
+
+        if self.bot is not None:
+            if self.typed < self.bot:
+                self.error(f'{self.typed} < {self.bot}')
+            if not self.incl_bot and self.typed == self.bot:
+                self.error(f'{self.typed} == {self.bot}')
+        if self.top is not None:
+            if self.typed > self.top:
+                self.error(f'{self.typed} > {self.top}')
+            if not self.incl_top and self.typed == self.top:
+                self.error(f'{self.typed} == {self.top}')
+
+    @staticmethod
+    def error(msg):
+        raise argparse.ArgumentTypeError(msg)
+
+
+class Int(Float):
+
+    Type = int
+
+    @classmethod
+    def typeSeed(cls, *args, top=2**32, incl_top=False, **kwargs):
+        seed = cls.typeNonnegative(*args, top=top, incl_top=incl_top, **kwargs)
+        np.random.seed(seed)
+        random.seed(seed)
+        return seed
 
 
 def get_parser(*args, formatter_class=argparse.ArgumentDefaultsHelpFormatter, **kwargs):
@@ -50,7 +83,7 @@ def get_parser(*args, formatter_class=argparse.ArgumentDefaultsHelpFormatter, **
 def add_seed(parser):
     parser.add_argument('-seed',
                         metavar='INT',
-                        type=type_seed,
+                        type=Int.typeSeed,
                         help='The integer to set random state')
 
 def set_seed(options):
@@ -62,6 +95,6 @@ def set_seed(options):
 def add_size(parser, default=200):
     parser.add_argument('-size',
                         metavar='INT',
-                        type=type_positive_int,
+                        type=Int.typePositive,
                         default=default,
                         help='Sample size')
