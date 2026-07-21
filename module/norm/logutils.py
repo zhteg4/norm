@@ -55,6 +55,7 @@ class Script:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if not exc_type:
             self.logger.info('Finished.', timestamp=True)
+            return
         if isinstance(exc_val, SystemExit):
             return
         self.logger.info(traceback.format_exc(), timestamp=True)

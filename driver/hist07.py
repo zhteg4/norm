@@ -5,7 +5,7 @@ from norm import logutils
 from norm import plotutils
 
 
-def norm(options=None):
+def norm(options):
     vals = np.random.normal(options.loc, options.scale, options.size)
     with plotutils.ax(options=options, logger=logger) as ax:
         ax.hist(vals, edgecolor="white")
@@ -15,8 +15,9 @@ class Parser(parserutils.DistribParser):
 
     def setUp(self):
         self.add_argument('-loc',
-                            default=40.,
+                            metavar='FLOAT',
                             type=float,
+                            default=40.,
                             help='Mean of the distribution')
         self.add_argument('-scale',
                             metavar='FLOAT',

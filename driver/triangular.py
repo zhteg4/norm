@@ -5,7 +5,7 @@ from norm import logutils
 from norm import plotutils
 
 
-def triangular(options=None):
+def triangular(options):
     vals = np.random.triangular(options.left, options.mode, options.right, options.size)
     with plotutils.ax(options=options, logger=logger) as ax:
         ax.hist(vals, edgecolor="white", bins=100)
