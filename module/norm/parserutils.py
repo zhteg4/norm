@@ -4,6 +4,7 @@ import argparse
 
 import pathlib
 import random
+import functools
 
 import numpy as np
 
@@ -27,6 +28,10 @@ class Float:
     @classmethod
     def typeNonnegative(cls, *args, bot=0, **kwargs):
         return cls.type(*args, bot=bot, **kwargs)
+
+    @classmethod
+    def partial(cls, *args, **kwargs):
+        return functools.partial(cls.type, *args, **kwargs)
 
     @classmethod
     def type(cls, *args, **kwargs):

@@ -23,7 +23,7 @@ class Parser(parserutils.DistribParser):
                             help='Number of trials')
         self.add_argument('-prob',
                             metavar='FLOAT',
-                            type=parserutils.Float.typeNonnegative,
+                            type=parserutils.Float.partial(bot=0, top=1),
                             default=0.5,
                             help='Probability of success')
         super().setUp()
