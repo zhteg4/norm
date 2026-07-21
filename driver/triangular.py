@@ -3,12 +3,21 @@ import sys
 from norm import parserutils
 from norm import logutils
 from norm import plotutils
+import argparse
 
 
 def triangular(options):
     vals = np.random.triangular(options.left, options.mode, options.right, options.size)
     with plotutils.ax(options=options, logger=logger) as ax:
         ax.hist(vals, edgecolor="white", bins=100)
+
+
+class Valid(parserutils.Valid):
+
+    def run(self):
+        if self.options.left < self.options.mode < self.options.right:
+            return
+        raise argparse.ArgumentTypeError(f"Invalid left ({self.options.left}) < mode ({self.options.mode}) < right ({self.options.right})")
 
 
 class Parser(parserutils.DistribParser):
@@ -29,6 +38,7 @@ class Parser(parserutils.DistribParser):
                             type=float,
                             default=5,
                             help='Upper limit of the distribution')
+        self.valids.add(Valid)
         super().setUp()
 
 
