@@ -1,6 +1,7 @@
 import logging
 from norm import timeutils
 import os
+import traceback
 
 
 class Logger(logging.Logger):
@@ -40,17 +41,21 @@ class Logger(logging.Logger):
         return logger
 
 
-class Base:
-    """
-    A base class with a logger to print logging messages.
-    """
+class Script:
 
-    def __init__(self, logger=None, options=None):
-        self.logger = logger
+    def __init__(self, options):
         self.options = options
+        self.logger = None
 
-    def info(self, msg, *args, **kwargs):
-        if self.logger:
-            self.logger.info(msg, *args, **kwargs)
-        else:
-            print(msg)
+    def __enter__(self):
+        self.logger = Logger.get(self.options.JOBNAME)
+        self.logger.infoJob(self.options)
+        return self.logger
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not exc_type:
+            self.logger.info('Finished.', timestamp=True)
+        if isinstance(exc_val, SystemExit):
+            return
+        self.logger.info(traceback.format_exc(), timestamp=True)
+        raise exc_val

@@ -11,34 +11,29 @@ def triangular(options=None):
         ax.hist(vals, edgecolor="white", bins=100)
 
 
-def get_parser():
-    parser = parserutils.get_parser(prog='triangular distribution')
-    parser.add_argument('-left',
-                        metavar='FLOAT',
-                        type=float,
-                        default=-3,
-                        help='Lower limit of the distribution')
-    parser.add_argument('-mode',
-                        metavar='FLOAT',
-                        type=float,
-                        default=0,
-                        help='Peak of the distribution')
-    parser.add_argument('-right',
-                        metavar='FLOAT',
-                        type=float,
-                        default=5,
-                        help='Upper limit of the distribution')
-    parserutils.add_size(parser, default=200000)
-    parserutils.add_seed(parser)
-    return parser
+class Parser(parserutils.DistribParser):
+    DEFAULT_SIZE = 200000
+    def setUp(self):
+        self.add_argument('-left',
+                            metavar='FLOAT',
+                            type=float,
+                            default=-3,
+                            help='Lower limit of the distribution')
+        self.add_argument('-mode',
+                            metavar='FLOAT',
+                            type=float,
+                            default=0,
+                            help='Peak of the distribution')
+        self.add_argument('-right',
+                            metavar='FLOAT',
+                            type=float,
+                            default=5,
+                            help='Upper limit of the distribution')
+        super().setUp()
 
 
 if __name__ == '__main__':
-    parser = get_parser()
-    options = parser.parse_args(sys.argv[1:])
-    parserutils.set_seed(options)
-    logger = logutils.Logger.get(options.JOBNAME)
-    logger.infoJob(options)
-    triangular(options)
-    logger.info('Finished', timestamp=True)
+    options = Parser(prog='triangular distribution').parse_args(sys.argv[1:])
+    with logutils.Script(options) as logger:
+        triangular(options)
 

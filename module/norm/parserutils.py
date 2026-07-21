@@ -68,33 +68,82 @@ class Int(Float):
         return seed
 
 
-def get_parser(*args, formatter_class=argparse.ArgumentDefaultsHelpFormatter, **kwargs):
-    parser = argparse.ArgumentParser(*args,
-                                     formatter_class=formatter_class, **kwargs)
-    parser.add_argument('-INTERAC',
-                        action='store_true',
-                        help='Enable interactive mode')
-    parser.add_argument('-JOBNAME',
-                        default=pathlib.Path(sys.argv[0]).stem,
-                        help='The jobname to name output files')
-    return parser
+class ArgumentParser(argparse.ArgumentParser):
+
+    FLAG_INTERAC = '-INTERAC'
+    FLAG_JOBNAME = '-JOBNAME'
+    JFLAGS = [FLAG_INTERAC, FLAG_JOBNAME]
+
+    def __init__(self,
+                 formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                 valids=None,
+                 **kwargs):
+        super().__init__(formatter_class=formatter_class, **kwargs)
+        self.valids = set() if valids is None else valids
+        self.setUp()
+
+    def setUp(self):
+        if self.FLAG_JOBNAME in self.JFLAGS:
+            self.add_argument(self.FLAG_JOBNAME,
+                              default=pathlib.Path(sys.argv[0]).stem,
+                              help='The jobname to name output files')
+        if self.FLAG_INTERAC in self.JFLAGS:
+            self.add_argument('-INTERAC',
+                                action='store_true',
+                                help='Enable interactive mode')
 
 
-def add_seed(parser):
-    parser.add_argument('-seed',
-                        metavar='INT',
-                        type=Int.typeSeed,
-                        help='The integer to set random state')
+    def parse_args(self, args=None, **kwargs):
+        options = super().parse_args(args=args, **kwargs)
+        for Valid in self.valids:
+            val = Valid(options)
+            try:
+                val.run()
+            except (ValueError, FileNotFoundError) as err:
+                self.error(err)
+        return options
 
-def set_seed(options):
-    if options.seed is not None:
-        return
-    options.seed = np.random.randint(0, 2**32)
-    np.random.seed(options.seed)
 
-def add_size(parser, default=200):
-    parser.add_argument('-size',
-                        metavar='INT',
-                        type=Int.typePositive,
-                        default=default,
-                        help='Sample size')
+class Valid:
+
+    def __init__(self, options):
+        self.options = options
+
+    def run(self):
+        pass
+
+
+class SeedValid(Valid):
+
+    def run(self):
+        if self.options.seed is not None:
+            return
+        self.options.seed = np.random.randint(0, 2 ** 32)
+        np.random.seed(self.options.seed)
+
+
+class RandomParser(ArgumentParser):
+
+    FLAG_SEED = '-seed'
+
+    def setUp(self):
+        self.add_argument('-seed',
+                            metavar='INT',
+                            type=Int.typeSeed,
+                            help='The integer to set random state')
+        self.valids.add(SeedValid)
+        super().setUp()
+
+
+class DistribParser(RandomParser):
+
+    FLAG_SIZE = '-size'
+    DEFAULT_SIZE = 200
+
+    def setUp(self):
+        self.add_argument('-size',
+                            metavar=self.FLAG_SIZE,
+                            type=Int.typePositive,
+                            default=self.DEFAULT_SIZE,
+                            help='Sample size')
+        super().setUp()
