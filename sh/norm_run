@@ -30,9 +30,7 @@ a=''; for val in "$@" ""; do \
   [ "$a" = "-DEBUG" ] && export DEBUG='1' && break || a=$val; done
 [ ! -z $DEBUG ] && case $(echo $val | tr [A-Z] [a-z]) \
   in n|no|f|false|off|0) export DEBUG='' ;; esac
-
-. nemd_func
-
+. norm_func
 # Python script
 for val in "$@"; do
   shift
@@ -73,5 +71,4 @@ val=''; for nxt in "$@" ''; do
   esac
   val=$nxt
 done
-
 debug "$@"; python "$@"
