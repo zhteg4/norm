@@ -24,16 +24,19 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vlayout = qtutils.VBoxLayout(layout=hlayout)
         self.loc_le = qtutils.FLineEdit(label='loc:',
                                         default='40',
-                                        tFin=self.plot,
-                                        layout=vlayout)
+                                        layout=vlayout,
+                                        eFin=self.plot)
         self.scale_le = qtutils.FLineEdit(label='scale:',
                                           default='1.5',
-                                          tFin=self.plot,
-                                          layout=vlayout)
+                                          rng=(0,10000,4),
+                                          layout=vlayout,
+                                          eFin=self.plot)
         self.size_le = qtutils.ILineEdit(label='size:',
                                          default='200',
-                                         tFin=self.plot,
-                                         layout=vlayout)
+                                         rng=(0, 100000),
+                                         layout=vlayout,
+                                         minw=50,
+                                         eFin=self.plot)
         vlayout.addStretch(1)
 
         reset_bn = QtWidgets.QPushButton("Reset")

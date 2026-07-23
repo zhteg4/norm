@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 from matplotlib.backends import backend_qtagg
 
 
@@ -20,12 +20,14 @@ class HBoxLayout(QtWidgets.QHBoxLayout):
 
 class LineEdit(QtWidgets.QLineEdit):
     Type = None
+    Validator = None
     def __init__(self,
                  *args,
                  label=None,
                  default=None,
                  layout=None,
                  minw=40,
+                 rng=(),
                  eFin=None,
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +44,8 @@ class LineEdit(QtWidgets.QLineEdit):
         self.reset()
         if eFin:
             self.editingFinished.connect(eFin)
+        if self.Validator:
+            self.setValidator(self.Validator(*rng))
 
     def reset(self):
         if self.default is not None:
@@ -56,9 +60,11 @@ class LineEdit(QtWidgets.QLineEdit):
 
 class ILineEdit(LineEdit):
     Type = int
+    Validator = QtGui.QIntValidator
 
 class FLineEdit(LineEdit):
     Type = float
+    Validator = QtGui.QDoubleValidator
 
 
 class FigureCanvas(backend_qtagg.FigureCanvas):
