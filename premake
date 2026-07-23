@@ -25,3 +25,4 @@ export NORM_SRC="$(readlink -f ${NORM_SRC} | xargs dirname)" && echo $NORM_SRC
 add_pypath $NORM_SRC/module
 add_path $NORM_SRC/driver
 add_path $NORM_SRC/sh
+add_path $NORM_SRC/gui

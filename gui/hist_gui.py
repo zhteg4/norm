@@ -13,37 +13,48 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.resize(600, 500)
         self.setCentralWidget(QtWidgets.QWidget())
         hlayout = QtWidgets.QHBoxLayout(self.centralWidget())
-        vlayout = qtutils.QVBoxLayout(layout=hlayout)
+        vlayout = qtutils.VBoxLayout(layout=hlayout)
 
-        canvas = qtutils.FigureCanvas(msize=(400, 300),
-                                      layout=vlayout,
-                                      parent=self)
+        self.canvas = qtutils.FigureCanvas(msize=(400, 300),
+                                           layout=vlayout,
+                                           parent=self)
 
-        self.ax = canvas.figure.subplots()
-        rng = np.random.default_rng()
-        samples = rng.normal(loc=40, scale=1.5, size=200)
-        self.ax.hist(samples, edgecolor="white")
+        self.ax = self.canvas.figure.subplots()
 
-        vlayout = qtutils.QVBoxLayout(layout=hlayout)
-        self.loc_le = qtutils.QLineEdit(label='loc:',
+        vlayout = qtutils.VBoxLayout(layout=hlayout)
+        self.loc_le = qtutils.FLineEdit(label='loc:',
                                         default='40',
+                                        tFin=self.plot,
                                         layout=vlayout)
-        self.scale_le = qtutils.QLineEdit(label='scale:',
+        self.scale_le = qtutils.FLineEdit(label='scale:',
                                           default='1.5',
+                                          tFin=self.plot,
                                           layout=vlayout)
-        self.size_le = qtutils.QLineEdit(label='size:',
+        self.size_le = qtutils.ILineEdit(label='size:',
                                          default='200',
+                                         tFin=self.plot,
                                          layout=vlayout)
         vlayout.addStretch(1)
 
         reset_bn = QtWidgets.QPushButton("Reset")
         reset_bn.clicked.connect(self.reset)
         vlayout.addWidget(reset_bn)
+        self.reset()
 
     def reset(self):
         self.loc_le.reset()
         self.scale_le.reset()
         self.size_le.reset()
+        self.plot()
+
+    def plot(self):
+        rng = np.random.default_rng()
+        samples = rng.normal(loc=self.loc_le.value,
+                             scale=self.scale_le.value,
+                             size=self.size_le.value)
+        self.ax.clear()
+        self.ax.hist(samples, edgecolor="white")
+        self.canvas.draw()
 
 
 if __name__ == "__main__":

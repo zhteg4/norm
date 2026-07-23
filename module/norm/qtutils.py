@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets, QtCore
 from matplotlib.backends import backend_qtagg
 
 
-class QVBoxLayout(QtWidgets.QVBoxLayout):
+class VBoxLayout(QtWidgets.QVBoxLayout):
 
     def __init__(self, *args, layout=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -10,7 +10,7 @@ class QVBoxLayout(QtWidgets.QVBoxLayout):
             layout.addLayout(self)
 
 
-class QHBoxLayout(QtWidgets.QHBoxLayout):
+class HBoxLayout(QtWidgets.QHBoxLayout):
 
     def __init__(self, *args, layout=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -18,14 +18,15 @@ class QHBoxLayout(QtWidgets.QHBoxLayout):
             layout.addLayout(self)
 
 
-class QLineEdit(QtWidgets.QLineEdit):
-
+class LineEdit(QtWidgets.QLineEdit):
+    Type = None
     def __init__(self,
                  *args,
                  label=None,
                  default=None,
                  layout=None,
                  minw=40,
+                 eFin=None,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.default = default
@@ -34,15 +35,30 @@ class QLineEdit(QtWidgets.QLineEdit):
             if layout is not None:
                 layout.addWidget(self)
             return
-        hlayout = QHBoxLayout(layout=layout)
+        hlayout = HBoxLayout(layout=layout)
         lb = QtWidgets.QLabel(label)
         hlayout.addWidget(lb)
         hlayout.addWidget(self)
         self.reset()
+        if eFin:
+            self.editingFinished.connect(eFin)
 
     def reset(self):
         if self.default is not None:
             self.setText(self.default)
+
+    @property
+    def value(self):
+        txt = self.text()
+        if self.Type is not None:
+            txt = self.Type(self.text())
+        return txt
+
+class ILineEdit(LineEdit):
+    Type = int
+
+class FLineEdit(LineEdit):
+    Type = float
 
 
 class FigureCanvas(backend_qtagg.FigureCanvas):
@@ -54,8 +70,9 @@ class FigureCanvas(backend_qtagg.FigureCanvas):
             self.setMinimumHeight(msize[1])
         if layout is not None:
             layout.addWidget(self)
-        if parent is not None:
-            toolbar = backend_qtagg.NavigationToolbar2QT(self, parent)
-            toolbar.setIconSize(QtCore.QSize(20, 20))
-            if layout is not None:
-                layout.addWidget(toolbar)
+        if parent is None:
+            return
+        toolbar = backend_qtagg.NavigationToolbar2QT(self, parent)
+        toolbar.setIconSize(QtCore.QSize(20, 20))
+        if layout is not None:
+            layout.addWidget(toolbar)
